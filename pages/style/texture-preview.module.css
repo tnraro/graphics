@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.item {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  text-align: center;
+  color: #4e555f;
+}
