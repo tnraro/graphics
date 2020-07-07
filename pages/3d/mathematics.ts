@@ -37,24 +37,30 @@ export const float = (v: number): float => v;
 export function float2(x: { x: number, y: number }): float2;
 export function float2(x: floats): float2;
 export function float2(x: any): float2 {
-  if (Array.isArray(x))
+  if (Array.isArray(x)) {
+    const [x0 = 0, x1 = 0] = x;
     return [x[0], x[1]];
+  }
   else
     return [x.x, x.y];
 }
 export function float3(x: { x: number, y: number, z: number }): float3;
 export function float3(x: float3 | float4): float3;
 export function float3(x: any): float3 {
-  if (Array.isArray(x))
+  if (Array.isArray(x)) {
+    const [x0 = 0, x1 = 0, x2 = 0] = x;
     return [x[0], x[1], x[2]];
+  }
   else
     return [x.x, x.y, x.z];
 }
 export function float4(x: { x: number, y: number, z: number, w: number }): float4;
 export function float4(x: float4): float4;
 export function float4(x: any): float4 {
-  if (Array.isArray(x))
-    return [x[0], x[1], x[2], x[4]];
+  if (Array.isArray(x)) {
+    const [x0 = 0, x1 = 0, x2 = 0, x3 = 0] = x;
+    return [x[0], x[1], x[2], x[3]];
+  }
   else
     return [x.x, x.y, x.z, x.w];
 }
