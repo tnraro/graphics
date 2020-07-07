@@ -1,4 +1,17 @@
-export const newObj = () => ({
+type xyzw = { x: number, y: number, z: number, w: number };
+type xyz = { x: number, y: number, z: number };
+type uvw = { u: number, v: number, w: number };
+type vtn = { v: number, t: number, n: number };
+type face = vtn[];
+export interface Obj {
+  o: string[],
+  v: xyzw[],
+  vt: uvw[],
+  vn: xyz[],
+  vp: { u: number, v: number, w: number }[],
+  f: face[],
+}
+export const newObj = (): Obj => ({
   o: [],
   v: [],
   vt: [],
@@ -6,15 +19,14 @@ export const newObj = () => ({
   vp: [],
   f: [],
 })
-export const parser = async (text) => {
+export const parser = (text: string): Obj => {
   const obj = newObj();
-  for (const line of text.trim().split(/\n/)) {
-    const l = line.trim();
-    if (l[0] === "#") continue;
-    const [type, ...rest] = l.split(" ");
+  for (const line of text.trim().split(/\s*\n\s*/)) {
+    if (line[0] === "#") continue;
+    const [type, ...rest] = line.split(/\s+/);
     switch (type) {
       case "o": {
-        const [name] = rest;
+        const name = rest.join(" ");
         obj.o.push(name);
         break;
       }
@@ -41,7 +53,7 @@ export const parser = async (text) => {
       case "f": {
         const face = rest.map(indices => {
           const [v, t, n] = indices.split('/').map(index => {
-            if (typeof index === "undefined") return index;
+            if (index === "") return undefined;
             return parseFloat(index) - 1;
           });
           return {v, t, n};
@@ -55,7 +67,7 @@ export const parser = async (text) => {
       case "g":
       case "l": {
         if (process.env.NODE_ENV === "development")
-          console.error(`unimplemented: "${l}"`);
+          console.error(`unimplemented: "${line}"`);
         break;
       }
       default:
