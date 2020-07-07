@@ -4,11 +4,11 @@ import Canvas from "./comps/canvas";
 import TextureManager from "./comps/texture-manager"
 import styles from "./style/app.module.css"
 import "./style/global.css";
-import * as obj from "./loader/obj";
+import * as ply from "./loader/ply";
+import { newModel } from "./3d/model";
 
 const App = () => {
-  const [model, setModel] = useState(obj.newObj());
-
+  const [model, setModel] = useState(newModel());
   const [textures, dispatchTextures] = useReducer((state, action) => {
     switch (action.type) {
       case "APPEND_TEXTURES": {
@@ -41,13 +41,35 @@ const App = () => {
   const loadObj = async e => {
     const file = e.target.files[0];
     const text = await file.text();
-    const model = await obj.parser(text);
-
+    const raw = await ply.parser(text);
+    const model = newModel();
+    for (const vertex of raw.vertices) {
+      model.vertices.push([
+        vertex['x'],
+        vertex['y'],
+        vertex['z'],
+        vertex['s'],
+        vertex['t'],
+        vertex['nx'],
+        vertex['ny'],
+        vertex['nz'],
+      ]);
+    }
+    for (const face of raw.faces) {
+      const indices = face['vertex_indices'];
+      for (let i = 2; i < indices.length; i++) {
+        model.faces.push([
+          indices[0],
+          indices[i - 1],
+          indices[i],
+        ]);
+      }
+    }
     setModel(model);
   }
   return <div className={styles.container}>
     <h1>쿠앙쿠앙</h1>
-    <input type="file" accept=".obj" onChange={loadObj}/>
+    <input type="file" accept=".ply" onChange={loadObj}/>
     <Canvas width={530} height={298} model={model} textures={textures.filter(({uploaded}) => uploaded)}/>
     <TextureManager textures={textures} dispatch={dispatchTextures}/>
   </div>;

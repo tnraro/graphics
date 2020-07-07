@@ -1,16 +1,8 @@
 import drawZBuffer from "./draw-z-buffer";
 import drawFramebuffer from "./draw-framebuffer";
-import { float2, float3, float4, matrix4x4, sub, cross } from "./mathematics";
+import { float, float2, float3, float4, matrix4x4, sub, cross } from "./mathematics";
+import * as m from "./model";
 
-const mapVertex = (model, indices) => {
-  const {v, t, n} = indices;
-
-  return {
-    v: model.v[v],
-    t: model.vt[t],
-    n: model.vn[n]
-  };
-}
 const linearMap = (v: float4, model: matrix4x4): float4 => {
   return [
     v[0] * model[0][0] + model[3][0],
@@ -24,7 +16,7 @@ export const draw = (props) => {
 
   const img = context.getImageData(0, 0, width, height);
   const zBuffer = new Uint16Array(width * height);
-  const zb = model.v.map(v => v.z);
+  const zb = model.vertices.map(v => v[2]);
   const scale = 1;
   const clip = {
     zMax: Math.max.apply(undefined, zb) * scale,
@@ -32,8 +24,9 @@ export const draw = (props) => {
   };
   const texture = textures[0] && textures[0].buf;
   const framebuffer = img.data;
-  for (const face of model.f) {
-    const [v0, v1, v2] = face.map(mapVertex.bind(undefined, model));
+  const mapv = (vertexIndex: float) => model.vertices[vertexIndex];
+  for (const face of model.faces) {
+    const [v0, v1, v2] = face.map(mapv);
 
     const [x, y, z, s] = [530 / 2, 298 / 2, 0, scale];
     const matrix = [
@@ -42,15 +35,18 @@ export const draw = (props) => {
       [0, 0, s, 0],
       [x, y, z, 1],
     ] as matrix4x4;
-    const p0 = linearMap(float4(v0.v), matrix);
-    const p1 = linearMap(float4(v1.v), matrix);
-    const p2 = linearMap(float4(v2.v), matrix);
+    const p0 = linearMap(m.xyzw(v0), matrix);
+    const p1 = linearMap(m.xyzw(v1), matrix);
+    const p2 = linearMap(m.xyzw(v2), matrix);
     const px: float3 = [p0[0], p1[0], p2[0]];
     const py: float3 = [p0[1], p1[1], p2[1]];
     const pz: float3 = [p0[2], p1[2], p2[2]];
     const pw: float3 = [p0[3], p1[3], p2[3]];
-    const tu: float3 = [v0.t.u, v1.t.u, v2.t.u];
-    const tv: float3 = [v0.t.v, v1.t.v, v2.t.v];
+    const t0: float2 = m.uv(v0);
+    const t1: float2 = m.uv(v1);
+    const t2: float2 = m.uv(v2);
+    const tu: float3 = [t0[0], t1[0], t2[0]];
+    const tv: float3 = [t0[1], t1[1], t2[1]];
     {
       // backface culling
       const p = float2(p0);
