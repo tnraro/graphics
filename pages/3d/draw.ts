@@ -38,15 +38,17 @@ export const draw = (props) => {
     const p0 = linearMap(m.xyzw(v0), matrix);
     const p1 = linearMap(m.xyzw(v1), matrix);
     const p2 = linearMap(m.xyzw(v2), matrix);
-    const px: float3 = [p0[0], p1[0], p2[0]];
-    const py: float3 = [p0[1], p1[1], p2[1]];
-    const pz: float3 = [p0[2], p1[2], p2[2]];
-    const pw: float3 = [p0[3], p1[3], p2[3]];
     const t0: float2 = m.uv(v0);
     const t1: float2 = m.uv(v1);
     const t2: float2 = m.uv(v2);
-    const tu: float3 = [t0[0], t1[0], t2[0]];
-    const tv: float3 = [t0[1], t1[1], t2[1]];
+    const params: float3[] = [
+      [p0[0], p1[0], p2[0]], // x
+      [p0[1], p1[1], p2[1]], // y
+      [p0[2], p1[2], p2[2]], // z
+      [p0[3], p1[3], p2[3]], // w
+      [t0[0], t1[0], t2[0]], // u
+      [t0[1], t1[1], t2[1]], // v
+    ];
     {
       // backface culling
       const p = float2(p0);
@@ -59,7 +61,7 @@ export const draw = (props) => {
         continue;
     }
     drawZBuffer({
-      px, py, pz, pw
+      params
     }, {
       zBuffer, clip,
       width, height,
@@ -67,8 +69,7 @@ export const draw = (props) => {
       isVisible: false
     });
     drawFramebuffer({
-      px, py, pz, pw,
-      tu, tv,
+      params
     }, {
       framebuffer,
       zBuffer, clip,

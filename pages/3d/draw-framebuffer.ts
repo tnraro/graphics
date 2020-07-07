@@ -22,14 +22,14 @@ const getPixelFromTexture = (texture, u: float, v: float): float4 => {
 }
 const drawFramebuffer = (props, global) => {
   const {
-    px, py, pz, pw,
-    tu, tv,
-    nx, ny, nz,
+    params
   } = props;
   const {
     framebuffer, zBuffer,
     clip, width, height, texture
   } = global;
+
+  const [px, py, pz, pw, tu, tv] = params;
 
   const hasUV =
     typeof tu !== "undefined" &&

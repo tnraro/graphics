@@ -1,14 +1,13 @@
 import { float2, float3, dot } from "./mathematics";
 import { getBarycentric } from "./draw-utils";
 interface IProp {
-  px: float3,
-  py: float3,
-  pz: float3,
-  pw: float3,
+  params: float3[]
 }
 const drawZBuffer = (props: IProp, global) => {
-  const { px, py, pz } = props;
+  const { params } = props;
   const { zBuffer, clip, width, height, framebuffer, isVisible } = global;
+
+  const [px, py, pz] = params;
 
   const vz: float3 = pz.map(z => Math.max(Math.min((z - clip.zMin) / (clip.zMax - clip.zMin), 1), 0) * 0xffff) as float3;
 
