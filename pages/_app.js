@@ -5,10 +5,11 @@ import TextureManager from "./comps/texture-manager"
 import styles from "./style/app.module.css"
 import "./style/global.css";
 import * as ply from "./loader/ply";
-import { newModel } from "./3d/model";
+import * as m from "./3d/model";
+import * as math from "./mathematics/math";
 
 const App = () => {
-  const [model, setModel] = useState(newModel());
+  const [model, setModel] = useState(m.newModel());
   const [textures, dispatchTextures] = useReducer((state, action) => {
     switch (action.type) {
       case "APPEND_TEXTURES": {
@@ -42,18 +43,24 @@ const App = () => {
     const file = e.target.files[0];
     const text = await file.text();
     const raw = await ply.parser(text);
-    const model = newModel();
+    const model = m.newModel();
     for (const vertex of raw.vertices) {
-      model.vertices.push([
-        vertex['x'],
-        vertex['y'],
-        vertex['z'],
-        vertex['s'],
-        vertex['t'],
-        vertex['nx'],
-        vertex['ny'],
-        vertex['nz'],
-      ]);
+      model.vertices.push({
+        p: [
+          vertex['x'],
+          vertex['y'],
+          vertex['z'],
+        ],
+        t: [
+          vertex['s'],
+          vertex['t'],
+        ],
+        n: [
+          vertex['nx'],
+          vertex['ny'],
+          vertex['nz'],
+        ]
+      });
     }
     for (const face of raw.faces) {
       const indices = face['vertex_indices'];

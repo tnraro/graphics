@@ -1,84 +1,111 @@
 import drawZBuffer from "./draw-z-buffer";
 import drawFramebuffer from "./draw-framebuffer";
-import { float, float2, float3, float4, matrix4x4, sub, cross } from "./mathematics";
+import { float, float2, float3, float4, matrix4x4, I4x4, matrix3x3, matrix3x2, matrix2x3 } from "../mathematics";
 import * as m from "./model";
-
-const linearMap = (v: float4, model: matrix4x4): float4 => {
-  return [
-    v[0] * model[0][0] + model[3][0],
-    v[1] * model[1][1] + model[3][1],
-    v[2] * model[2][2] + model[3][2],
-    1
-  ];
+import * as math from "../mathematics/math";
+import { ITexture } from "../comps/header";
+import { View, getViewMatrix } from "./view";
+import { ICamera, getPerspectiveProjectionMatrix } from "./camera";
+import * as DrawPass from "../comps/hooks/useDrawPass";
+import { toCanvas } from "./canvas";
+interface IProp {
+  context: CanvasRenderingContext2D,
+  model: m.IModel,
+  camera: ICamera,
+  width: float,
+  height: float,
+  textures: ITexture[],
+  drawPass: DrawPass.IState
 }
-export const draw = (props) => {
-  const { context, model, view, width, height, textures } = props;
+const getMVP = (m: matrix4x4, camera: ICamera, perspective: boolean = true): matrix4x4 => {
+  const model = m;
+  const view = getViewMatrix(camera.view);
+  const projection = getPerspectiveProjectionMatrix(camera);
+
+  const mvp = math.mul4x4x4(projection, math.mul4x4x4(view, model));
+
+  return mvp;
+}
+const toNDC = (m: matrix4x4, p: float3): float3 => {
+  const [[x, y, z, w]] = math.mul4x4x1(m, [float4(p, 1)]);
+  // TODO: important
+  return [x / w, y / w, z / w];
+}
+export const draw = (props: IProp) => {
+  const { context, model, camera, width, height, textures, drawPass } = props;
 
   const img = context.getImageData(0, 0, width, height);
   const zBuffer = new Uint16Array(width * height);
-  const zb = model.vertices.map(v => v[2]);
-  const scale = 1;
-  const clip = {
-    zMax: Math.max.apply(undefined, zb) * scale,
-    zMin: Math.min.apply(undefined, zb) * scale,
-  };
   const texture = textures[0] && textures[0].buf;
   const framebuffer = img.data;
-  const mapv = (vertexIndex: float) => model.vertices[vertexIndex];
+  const mvp = getMVP(model.transform, camera);
   for (const face of model.faces) {
-    const [v0, v1, v2] = face.map(mapv);
-
-    const [x, y, z, s] = [530 / 2, 298 / 2, 0, scale];
-    const matrix = [
-      [s, 0, 0, 0],
-      [0, s, 0, 0],
-      [0, 0, s, 0],
-      [x, y, z, 1],
-    ] as matrix4x4;
-    const p0 = linearMap(m.xyzw(v0), matrix);
-    const p1 = linearMap(m.xyzw(v1), matrix);
-    const p2 = linearMap(m.xyzw(v2), matrix);
-    const t0: float2 = m.uv(v0);
-    const t1: float2 = m.uv(v1);
-    const t2: float2 = m.uv(v2);
-    const params: float3[] = [
-      [p0[0], p1[0], p2[0]], // x
-      [p0[1], p1[1], p2[1]], // y
-      [p0[2], p1[2], p2[2]], // z
-      [p0[3], p1[3], p2[3]], // w
-      [t0[0], t1[0], t2[0]], // u
-      [t0[1], t1[1], t2[1]], // v
+    const [v0, v1, v2] = [
+      model.vertices[face[0]],
+      model.vertices[face[1]],
+      model.vertices[face[2]],
     ];
+    const p0 = toNDC(mvp, v0.p);
+    const p1 = toNDC(mvp, v1.p);
+    const p2 = toNDC(mvp, v2.p);
+    const t0: float2 = v0.t;
+    const t1: float2 = v1.t;
+    const t2: float2 = v2.t;
     {
       // backface culling
-      const p = float2(p0);
-      const v = sub(float2(p2), p);
-      const w = sub(float2(p1), p);
+      const p = math.xy(p0);
+      const v = math.sub22(math.xy(p2), p);
+      const w = math.sub22(math.xy(p1), p);
 
-      const isBack = cross(v, w) >= 0;
+      const isBack = math.cross22(v, w) >= 0;
 
-      if (isBack)
+      if (isBack) {
         continue;
+      }
     }
+    {
+      // Frustum culling
+      const [x0, y0, z0] = p0;
+      const [x1, y1, z1] = p1;
+      const [x2, y2, z2] = p2;
+
+      const out0 = x0 < -1 || x0 > 1 ||
+                   y0 < -1 || y0 > 1 ||
+                   z0 < -1 || z0 > 1;
+      const out1 = x1 < -1 || x1 > 1 ||
+                   y1 < -1 || y1 > 1 ||
+                   z1 < -1 || z1 > 1;
+      const out2 = x2 < -1 || x2 > 1 ||
+                   y2 < -1 || y2 > 1 ||
+                   z2 < -1 || z2 > 1;
+      if (out0 && out1 && out2) {
+        continue;
+      }
+    }
+    const tc = toCanvas.bind(undefined, width, height, 0xffff);
+    const p: matrix3x3 = math.transpose3x3([
+      tc(p0),
+      tc(p1),
+      tc(p2)
+    ]);
+    const t: matrix3x2 = math.transpose2x3([t0, t1, t2]);
     drawZBuffer({
-      params
+      p
     }, {
-      zBuffer, clip,
+      zBuffer, camera,
       width, height,
       framebuffer,
-      isVisible: false
+      isVisible: drawPass.zBuffer
     });
     drawFramebuffer({
-      params
+      p, t
     }, {
       framebuffer,
-      zBuffer, clip,
+      zBuffer, camera,
       width, height,
       texture,
+      isVisible: drawPass.framebuffer
     });
   }
-
-  context.fillStyle = "white";
-  context.fillRect(200, 150, 100, 100);
   context.putImageData(img, 0, 0);
 }

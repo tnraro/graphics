@@ -1,15 +1,14 @@
 import {
-  float, float2, float3, float4,
-  matrix4x4,
-  sub,
-  cross,
-  dot,
-} from "./mathematics";
+  float, float2, float3, float4, matrix3x3, matrix3x2,
+} from "../mathematics";
 import {
   getBarycentric
 } from "./draw-utils";
+import * as math from "../mathematics/math";
+import { ICamera } from "./camera";
+import { ITexture } from "../comps/header";
 
-const getPixelFromTexture = (texture, u: float, v: float): float4 => {
+const getPixelFromTexture = (texture: ImageData, u: float, v: float): float4 => {
   const { width, height, data } = texture;
   const x = Math.round(u * width);
   const y = Math.round((1 - v) * height);
@@ -20,24 +19,39 @@ const getPixelFromTexture = (texture, u: float, v: float): float4 => {
   const a = data[index + 3];
   return [ r, g, b, a ];
 }
-const drawFramebuffer = (props, global) => {
+interface IProp {
+  p: matrix3x3;
+  t: matrix3x2;
+}
+interface IGlobal {
+  framebuffer: Uint8ClampedArray;
+  zBuffer: Uint16Array;
+  camera: ICamera;
+  width: float;
+  height: float;
+  texture: ImageData;
+  isVisible: boolean;
+}
+const rescale = (v: float, k: float) => (v + 1) * .5 * k;
+const drawFramebuffer = (props: IProp, global: IGlobal) => {
   const {
-    params
+    p, t
   } = props;
   const {
     framebuffer, zBuffer,
-    clip, width, height, texture
+    width, height, texture,
+    isVisible
   } = global;
 
-  const [px, py, pz, pw, tu, tv] = params;
+  if (!isVisible)
+    return;
+  const [px, py, pz] = p;
+  const [tu, tv] = t;
 
-  const hasUV =
-    typeof tu !== "undefined" &&
-    typeof tv !== "undefined";
+  // TODO
+  const hasUV = true;
 
   const shouldTexture = typeof texture !== "undefined" && hasUV;
-
-  const vz: float3 = pz.map(z => Math.max(Math.min((z - clip.zMin) / (clip.zMax - clip.zMin), 1), 0) * 0xffff) as float3;
 
   const minX = Math.max(Math.floor(Math.min(...px)), 0);
   const minY = Math.max(Math.floor(Math.min(...py)), 0);
@@ -50,22 +64,24 @@ const drawFramebuffer = (props, global) => {
     for (let y = minY; y < maxY; y += 1) {
       const p: float2 = [x, y];
       const barycentric: float3 = getBc(p);
-      const isInside = barycentric.every(e => e >= 0);
-      if (isInside) {
-        const z = Math.round(dot(barycentric, vz));
-        const index = (height - y) * width + x;
-        if (zBuffer[index] === z) {
-          let color: float4 = [0xff, 0xff, 0xff, 0xff];
-          if (shouldTexture) {
-            const u = dot(barycentric, tu);
-            const v = dot(barycentric, tv);
-            color = getPixelFromTexture(texture, u, v);
-          }
-          framebuffer[index * 4 + 0] = color[0];
-          framebuffer[index * 4 + 1] = color[1];
-          framebuffer[index * 4 + 2] = color[2];
-          framebuffer[index * 4 + 3] = color[3];
+      const isOutside = barycentric[0] < 0 ||
+                        barycentric[1] < 0 ||
+                        barycentric[2] < 0;
+      if (isOutside)
+        continue;
+      const z = Math.round(math.dot33(barycentric, pz));
+      const index = y * width + x;
+      if (zBuffer[index] === z) {
+        let color: float4 = [0xff, 0xff, 0xff, 0xff];
+        if (shouldTexture) {
+          const u = math.dot33(barycentric, tu);
+          const v = math.dot33(barycentric, tv);
+          color = getPixelFromTexture(texture, u, v);
         }
+        framebuffer[index * 4 + 0] = color[0];
+        framebuffer[index * 4 + 1] = color[1];
+        framebuffer[index * 4 + 2] = color[2];
+        framebuffer[index * 4 + 3] = color[3];
       }
     }
   }
