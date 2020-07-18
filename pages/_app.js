@@ -45,22 +45,22 @@ const App = () => {
     const raw = await ply.parser(text);
     const model = m.newModel();
     for (const vertex of raw.vertices) {
-      model.vertices.push({
-        p: [
+      model.vertices.push([
+        [
           vertex['x'],
           vertex['y'],
           vertex['z'],
         ],
-        t: [
+        [
           vertex['s'],
           vertex['t'],
         ],
-        n: [
+        [
           vertex['nx'],
           vertex['ny'],
           vertex['nz'],
         ]
-      });
+      ]);
     }
     for (const face of raw.faces) {
       const indices = face['vertex_indices'];
@@ -77,7 +77,7 @@ const App = () => {
   return <div className={styles.container}>
     <h1>쿠앙쿠앙</h1>
     <input type="file" accept=".ply" onChange={loadObj}/>
-    <Canvas width={530} height={298} model={model} textures={textures.filter(({uploaded}) => uploaded)}/>
+    <Canvas width={298} height={530} model={model} textures={textures.filter(({uploaded}) => uploaded)}/>
     <TextureManager textures={textures} dispatch={dispatchTextures}/>
   </div>;
 }

@@ -5,11 +5,7 @@ export type TextureId = string;
 export interface Material {
   textureId: TextureId;
 }
-export type Vertex = {
-  p: float3,
-  t: float2,
-  n: float3
-};
+export type Vertex = [float3, float2, float3];
 export interface IModel {
   vertices: Vertex[],
   faces: float3[],

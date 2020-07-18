@@ -1,43 +1,30 @@
 import styles from "../style/canvas-inspector.module.css";
 import { IModel } from "../3d/model";
 import { ITexture } from "./header";
-import * as DrawPass from "./hooks/useDrawPass";
-import { Dispatch, ChangeEvent } from "react";
+import { Dispatch, ChangeEvent, SetStateAction } from "react";
 interface IProp {
   deltaTime: number,
   model: IModel,
   textures: ITexture[],
-  drawPass: DrawPass.IState,
-  setDrawPass: Dispatch<DrawPass.IAction>;
+  chosenBuffer: number,
+  chooseBuffer: Dispatch<SetStateAction<number>>;
 }
 const CanvasInspector = (props: IProp) => {
-  const { deltaTime, model, textures, drawPass, setDrawPass } = props;
-  const toggleZBuffer = (e: ChangeEvent<HTMLInputElement>) => {
-    setDrawPass({
-      type: "TOGGLE_Z_BUFFER"
-    });
-  }
-  const toggleFramebuffer = (e: ChangeEvent<HTMLInputElement>) => {
-    setDrawPass({
-      type: "TOGGLE_FRAMEBUFFER"
-    });
+  const { deltaTime, model, textures, chosenBuffer, chooseBuffer } = props;
+  const buffers = ["framebuffer", "z-buffer", "undefined", "undefined2", "undefined3", "albedo-buffer"];
+  const changeSelect = (e: ChangeEvent<HTMLSelectElement>) => {
+    chooseBuffer(parseInt(e.target.value));
   }
   return <div className={styles.container}>
-    <span>{`deltaTime: ${deltaTime}ms`}</span>
+    <span>{`deltaTime: ${deltaTime}ms, ${1000 / deltaTime | 0}fps`}</span>
     <span>{`vertices: ${model.vertices.length} | tries ${model.faces.length}`}</span>
     <span>{`textures: ${textures.length}`}</span>
-    <div>
-      <label>
-        <input type="checkbox" checked={drawPass.zBuffer} onChange={toggleZBuffer} />
-        {"z-buffer"}
-      </label>
-    </div>
-    <div>
-      <label>
-        <input type="checkbox" checked={drawPass.framebuffer} onChange={toggleFramebuffer} />
-        {"framebuffer"}
-      </label>
-    </div>
+    <label>
+      choose a buffer
+      <select value={chosenBuffer} onChange={changeSelect}>
+        {buffers.map((name, i) => <option key={name} value={i}>{name}</option>)}
+      </select>
+    </label>
   </div>;
 }
 

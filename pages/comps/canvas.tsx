@@ -2,15 +2,13 @@ import {
   useEffect,
   createRef,
   useState,
-  useReducer,
 } from "react";
 import Inspector from "./canvas-inspector";
 import styles from "../style/canvas.module.css";
-import {draw} from "../3d/draw";
+import {draw} from "../rp/draw";
 import { newCamera } from "../3d/camera";
 import * as math from "../mathematics/math";
 import * as t from "../3d/transform";
-import { useDrawPass } from "./hooks/useDrawPass";
 import { View } from "../3d/view";
 import { IModel } from "../3d/model";
 import { ITexture } from "./header";
@@ -35,17 +33,22 @@ const Canvas = (props: IProp) => {
   const _canvas = createRef<HTMLCanvasElement>();
   const [inspector, toggleInspector] = useInspectorToggle();
   const [deltaTime, setDeltaTime] = useState(0);
-  const [drawPass, setDrawPass] = useDrawPass();
+  const [chosenBuffer, chooseBuffer] = useState(0);
   useEffect(() => {
     const $canvas = _canvas.current;
     const context = $canvas.getContext("2d");
     const view: View = [[0, 0, -1], [0, 0, 7]];
     // const transform = math.mul4x4x4(t.translate(-.725, -.588, -1.38), t.scale(1, 1, 1));
     const transform = math.mul4x4x4(t.translate(0, 0, 0), t.scale(1, 1, 1));
-    const camera = newCamera(80 * math.TAU / 360, width / height, 0.1, 1000, view);
+    const camera = newCamera(80 * math.TAU / 360, width / height, .01, 10, view);
     model.transform = transform;
-    let r = 0;
+    let r = 45 * math.radians;
     let distance = 7;
+    const [sin, cos] = math.sincos(r);
+    camera.view[0][0] = sin;
+    camera.view[0][2] = - cos;
+    camera.view[1][0] = sin * distance;
+    camera.view[1][2] = cos * distance;
     const id = setInterval(() => {
       const deltaTime = 50 / 1000;
       r += 50 * math.radians * deltaTime;
@@ -62,26 +65,33 @@ const Canvas = (props: IProp) => {
       if (e.target === $canvas) {
         const [x, y] = toNDC2(width, height, [e.offsetX, e.offsetY])
         // camera.view[1][0] = x * sensitive;
-        distance = 5 + y * sensitive;
+        distance = y * sensitive * 6 + 7;
       }
     };
     let isRunning = true;
+    const zbuf = new ImageData(width, height);
+    const albedo = new ImageData(width, height);
+    zbuf.data.fill(0xffff);
     const render = () => {
       if (!isRunning) return;
       const time = Date.now();
 
       context.fillStyle = "black";
       context.fillRect(0, 0, width, height);
-
+      const img = context.getImageData(0, 0, width, height);
+      zbuf.data.fill(0xffff);
+      albedo.data.fill(0);
+      const buffers = [img, zbuf, undefined, undefined, undefined, albedo];
       draw({
-        context,
-        model,
+        models: [model],
         camera,
+        buffers,
         width,
         height,
         textures,
-        drawPass
+        _debugShowBuffer: chosenBuffer
       });
+      context.putImageData(img, 0, 0);
 
       if (inspector) {
         const deltaTime = Date.now() - time;
@@ -99,7 +109,7 @@ const Canvas = (props: IProp) => {
       clearInterval(id);
       window.removeEventListener("mousemove", mousemove);
     };
-  }, [props, drawPass]);
+  }, [props, chosenBuffer]);
 
   return <div className={styles.container}>
     <div className={styles.left}>
@@ -107,7 +117,7 @@ const Canvas = (props: IProp) => {
     </div>
     <div className={styles.right}>
       <button onClick={toggleInspector as (event: any) => void}>{inspector ? "close the inspector" : "open the inspector"}</button>
-      {inspector && <Inspector deltaTime={deltaTime} model={model} textures={textures} drawPass={drawPass} setDrawPass={setDrawPass} />}
+      {inspector && <Inspector deltaTime={deltaTime} model={model} textures={textures} chosenBuffer={chosenBuffer} chooseBuffer={chooseBuffer} />}
     </div>
   </div>;
 }
