@@ -1,4 +1,4 @@
-import { float3, matrix4x4, float4 } from "../mathematics";
+import { float3, matrix4x4, float4 } from "../mathematics/types";
 import * as math from "../mathematics/math";
 
 // [v, p]

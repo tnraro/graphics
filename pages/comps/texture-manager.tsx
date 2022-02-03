@@ -1,7 +1,7 @@
 import TextureSetting from "./texture-setting";
 import styles from "../style/texture.module.css";
 import { ChangeEvent, RefObject } from "react";
-import { ITexture, TUpload, TOnLoad} from "./header";
+import { ITexture, TUpload, TOnLoad} from "../rp/types";
 
 let textureId = 0;
 const newTexture = (file: File): ITexture => {
@@ -11,13 +11,12 @@ const newTexture = (file: File): ITexture => {
     uploaded: false,
     file,
     name,
-    buf: undefined,
+    buf: null,
   }
 };
-const createTextureBuffer = (imgRef: RefObject<HTMLImageElement>) => {
+const createTextureBuffer = (img: HTMLImageElement) => {
   const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  const img = imgRef.current;
+  const context = canvas.getContext("2d")!;
   const width = img.naturalWidth;
   const height = img.naturalHeight;
   canvas.width = width;
@@ -33,7 +32,7 @@ const TextureManager = (props: ITextureManager) => {
   const { textures, dispatch } = props;
   const upload: TUpload = (id, imgRef, e) => {
     if (e.target.checked) {
-      const buf = createTextureBuffer(imgRef);
+      const buf = createTextureBuffer(imgRef.current!);
       dispatch({
         type: "UPLOAD_TEXTURE",
         id,
@@ -47,6 +46,9 @@ const TextureManager = (props: ITextureManager) => {
     }
   }
   const onLoad: TOnLoad = e => {
+    if (e.target.files == null) {
+      throw new Error("files must not be null");
+    }
     const textures = [...e.target.files].map(newTexture);
     dispatch({
       type: "APPEND_TEXTURES",

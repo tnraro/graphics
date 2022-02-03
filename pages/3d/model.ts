@@ -1,4 +1,5 @@
-import { float, float2, float3, float4, matrix4x4, I4x4, matrix } from "../mathematics";
+import type { float2, float3 } from "../mathematics/types";
+import { I4x4 } from "../mathematics/utility";
 import { Transform } from "./transform";
 
 export type TextureId = string;

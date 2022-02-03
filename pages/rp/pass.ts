@@ -1,12 +1,12 @@
-import { float3, float } from "../mathematics";
+import type { float3, float } from "../mathematics/types";
 import { ICamera } from "../3d/camera";
 import { IModel } from "../3d/model";
-import { ITexture } from "../comps/header";
+import type { ITexture } from "./types";
 import { rxyz, wxyz } from "./buffer";
 export interface IProp {
   camera: ICamera;
   models: IModel[];
-  buffers: ImageData[];
+  buffers: (ImageData | null)[];
   width: float;
   height: float;
   textures: ITexture[];
@@ -32,9 +32,9 @@ const dot = (
 export const gBuffering: ISubPass = (prop, out) => {
   const width = prop.width,
     height = prop.height,
-    framebuffer = prop.buffers[0],
-    zbuf = prop.buffers[1],
-    albedo = prop.buffers[5],
+    framebuffer = prop.buffers[0]!,
+    zbuf = prop.buffers[1]!,
+    albedo = prop.buffers[5]!,
     near = prop.camera.near,
     far = prop.camera.far;
   let x0 = toScreenX(out.x0, width),
@@ -97,16 +97,17 @@ export const gBuffering: ISubPass = (prop, out) => {
       if (texture) {
         let u = dot(w0, w1, w2, tu0, tu1, tu2);
         let v = dot(w0, w1, w2, tv0, tv1, tv2);
+        const textureBuf = texture.buf!;
         u *= z;
         v *= z;
         v = 1 - v;
-        u = Math.round(u * texture.buf.width);
-        v = Math.round(v * texture.buf.height);
-        const tIndex = v * texture.buf.width + u;
-        let r = texture.buf.data[tIndex * 4];
-        let g = texture.buf.data[tIndex * 4 + 1];
-        let b = texture.buf.data[tIndex * 4 + 2];
-        let a = texture.buf.data[tIndex * 4 + 3];
+        u = Math.round(u * textureBuf.width);
+        v = Math.round(v * textureBuf.height);
+        const tIndex = v * textureBuf.width + u;
+        let r = textureBuf.data[tIndex * 4];
+        let g = textureBuf.data[tIndex * 4 + 1];
+        let b = textureBuf.data[tIndex * 4 + 2];
+        let a = textureBuf.data[tIndex * 4 + 3];
         albedo.data[index * 4] = r;
         albedo.data[index * 4 + 1] = g;
         albedo.data[index * 4 + 2] = b;

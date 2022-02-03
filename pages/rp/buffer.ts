@@ -1,5 +1,3 @@
-import { w } from "../mathematics/math";
-
 type type_r8 = (x: number) => number;
 type type_r16 = (x: number, y: number) => number;
 type type_r24 = (x: number, y: number, z: number) => number;

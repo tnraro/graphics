@@ -115,7 +115,7 @@ const parseHeader = (text: string) => {
         if (currentElementIndex === -1)
           throw new Error();
         const element = header.elements[currentElementIndex];
-        const name = rest.pop();
+        const name = rest.pop()!;
         const type = getPropertyType(rest);
         header.elements[currentElementIndex].properties.push({
           type,
@@ -144,8 +144,8 @@ const parseData = (header: Header, data: string) => {
     if (lengths[j] <= i)
       j += 1;
     const element = header.elements[j];
-    const getProperties = (data) => {
-      const o = {};
+    const getProperties = (data: number[]) => {
+      const o: { [index: string]: number | number[] } = {};
       for (let [i, property] of element.properties.entries()) {
         if (typeof property.type === "object") {
           const [length, ...rest] = data;

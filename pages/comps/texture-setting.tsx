@@ -1,11 +1,11 @@
 import { useState, createRef } from "react";
 import styles from "../style/texture.module.css";
-import { ITexture, TUpload, TImgRef } from "./header";
+import { ITexture, TUpload, TImgRef } from "../rp/types";
 
 interface TextureSetting extends ITexture {
   upload: TUpload
 }
-const TextureSetting = (props) => {
+const TextureSetting = (props: TextureSetting) => {
   const { id, uploaded, name, file, upload } = props;
   const [isImgLoaded, setIsImgLoaded] = useState(false);
   const imgRef: TImgRef = createRef();

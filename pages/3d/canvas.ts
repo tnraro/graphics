@@ -1,4 +1,4 @@
-import { float, matrix4x3, float3, float2 } from "../mathematics";
+import type { float, matrix4x3, float3, float2 } from "../mathematics/types";
 
 export const toCanvas2 = (width: float, height: float, xy: float2): float2 => {
   const [x, y] = xy;

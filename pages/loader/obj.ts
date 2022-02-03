@@ -1,7 +1,7 @@
 type xyzw = { x: number, y: number, z: number, w: number };
 type xyz = { x: number, y: number, z: number };
 type uvw = { u: number, v: number, w: number };
-type vtn = { v: number, t: number, n: number };
+type vtn = { v: number | undefined, t: number | undefined, n: number | undefined };
 type face = vtn[];
 export interface Obj {
   o: string[],

@@ -1,6 +1,6 @@
 import styles from "../style/canvas-inspector.module.css";
 import { IModel } from "../3d/model";
-import { ITexture } from "./header";
+import { ITexture } from "../rp/types";
 import { Dispatch, ChangeEvent, SetStateAction } from "react";
 interface IProp {
   deltaTime: number,

@@ -1,7 +1,7 @@
 import {
   useEffect,
-  createRef,
   useState,
+  useRef,
 } from "react";
 import Inspector from "./canvas-inspector";
 import styles from "../style/canvas.module.css";
@@ -11,7 +11,7 @@ import * as math from "../mathematics/math";
 import * as t from "../3d/transform";
 import { View } from "../3d/view";
 import { IModel } from "../3d/model";
-import { ITexture } from "./header";
+import { ITexture } from "../rp/types";
 import { toNDC2 } from "../3d/canvas";
 
 const useInspectorToggle = () => {
@@ -30,13 +30,19 @@ interface IProp {
 }
 const Canvas = (props: IProp) => {
   const {width, height, model, textures} = props;
-  const _canvas = createRef<HTMLCanvasElement>();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [inspector, toggleInspector] = useInspectorToggle();
   const [deltaTime, setDeltaTime] = useState(0);
   const [chosenBuffer, chooseBuffer] = useState(0);
   useEffect(() => {
-    const $canvas = _canvas.current;
+    const $canvas = canvasRef.current;
+    if ($canvas == null) {
+      throw new Error("The canvas must not be null");
+    }
     const context = $canvas.getContext("2d");
+    if (context == null) {
+      throw new Error("The context must not be null");
+    }
     const view: View = [[0, 0, -1], [0, 0, 7]];
     // const transform = math.mul4x4x4(t.translate(-.725, -.588, -1.38), t.scale(1, 1, 1));
     const transform = math.mul4x4x4(t.translate(0, 0, 0), t.scale(1, 1, 1));
@@ -61,7 +67,7 @@ const Canvas = (props: IProp) => {
       // camera.view[1][2] += - 0.1 * deltaTime;*/
     }, 50);
     const sensitive = 1.5;
-    const mousemove = e => {
+    const mousemove = (e: MouseEvent) => {
       if (e.target === $canvas) {
         const [x, y] = toNDC2(width, height, [e.offsetX, e.offsetY])
         // camera.view[1][0] = x * sensitive;
@@ -81,7 +87,7 @@ const Canvas = (props: IProp) => {
       const img = context.getImageData(0, 0, width, height);
       zbuf.data.fill(0xffff);
       albedo.data.fill(0);
-      const buffers = [img, zbuf, undefined, undefined, undefined, albedo];
+      const buffers = [img, zbuf, null, null, null, albedo];
       draw({
         models: [model],
         camera,
@@ -113,7 +119,7 @@ const Canvas = (props: IProp) => {
 
   return <div className={styles.container}>
     <div className={styles.left}>
-      <canvas ref={_canvas} width={width} height={height}></canvas>
+      <canvas ref={canvasRef} width={width} height={height}></canvas>
     </div>
     <div className={styles.right}>
       <button onClick={toggleInspector as (event: any) => void}>{inspector ? "close the inspector" : "open the inspector"}</button>

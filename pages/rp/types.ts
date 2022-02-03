@@ -5,7 +5,7 @@ export interface ITexture {
   uploaded: boolean,
   file: File,
   name: string,
-  buf: ImageData;
+  buf: ImageData | null;
 }
 export type TImgRef = RefObject<HTMLImageElement>;
 export type TUpload = (id: string, imgRef: TImgRef, e: ChangeEvent<HTMLInputElement>) => void;

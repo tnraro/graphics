@@ -10,7 +10,6 @@ export const float4 = (xyz: float3, w: float): float4 => [xyz[0], xyz[1], xyz[2]
  * 2\
  * 3
  */
-export type floats = float2 | float3 | float4;
 export type matrix1x2 = float2;
 export type matrix1x3 = float3;
 export type matrix1x4 = float4;

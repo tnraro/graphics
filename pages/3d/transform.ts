@@ -1,5 +1,6 @@
-import { matrix4x4, float, float3, float4, I4x4 } from "../mathematics";
+import type { matrix4x4, float, float3, float4 } from "../mathematics/types";
 import * as math from "../mathematics/math";
+import { I4x4 } from "../mathematics/utility";
 
 export type Transform = matrix4x4;
 export const newTransform = I4x4;

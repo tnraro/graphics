@@ -1,4 +1,4 @@
-import { float, matrix4x4 } from "../mathematics";
+import type { float, matrix4x4 } from "../mathematics/types";
 import { View } from "./view";
 
 export interface ICamera {

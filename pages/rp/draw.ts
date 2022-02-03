@@ -1,10 +1,10 @@
 import { IProp, gBuffering, State } from "./pass";
 import { IModel } from "../3d/model";
-import { ICamera, getPerspectiveProjectionMatrix } from "../3d/camera";
+import { getPerspectiveProjectionMatrix } from "../3d/camera";
 import * as math from "../mathematics/math";
 import { getViewMatrix } from "../3d/view";
-import { float3, matrix4x4, float4, matrix, I4x4, float } from "../mathematics";
-import { unsafe_r24, r24 } from "./buffer";
+import type { float3, matrix4x4, float4, float } from "../mathematics/types";
+import { unsafe_r24 } from "./buffer";
 
 const getMVP = (prop: IProp, model: IModel): matrix4x4 => {
   const { camera } = prop;
@@ -132,8 +132,8 @@ export const draw = (prop: IProp) => {
 }
 const drawZBuffer = (prop: IProp) => {
   const { width, height, buffers } = prop;
-  const framebuffer = buffers[0].data;
-  const zbuf = buffers[1].data;
+  const framebuffer = buffers[0]!.data;
+  const zbuf = buffers[1]!.data;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       let index = (y * width + x) * 4;
@@ -148,8 +148,8 @@ const drawZBuffer = (prop: IProp) => {
 }
 const drawAlbedoBuffer = (prop: IProp) => {
   const { width, height, buffers } = prop;
-  const framebuffer = buffers[0].data;
-  const albedo = buffers[5].data;
+  const framebuffer = buffers[0]!.data;
+  const albedo = buffers[5]!.data;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       let index = (y * width + x) * 4;
@@ -162,9 +162,9 @@ const drawAlbedoBuffer = (prop: IProp) => {
 }
 const drawDeferredRendering = (prop: IProp) => {
   const { width, height, buffers } = prop;
-  const framebuffer = buffers[0].data;
-  const zbuf = buffers[1].data;
-  const albedo = buffers[5].data;
+  const framebuffer = buffers[0]!.data;
+  const zbuf = buffers[1]!.data;
+  const albedo = buffers[5]!.data;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       let index = (y * width + x) * 4;
