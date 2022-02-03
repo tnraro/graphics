@@ -1,4 +1,4 @@
-import { float, float3, quaternion } from "./header";
+import { float, float3, quaternion } from "./types";
 import {
   mul13, add33, add44, sub44, mul44,
   cross33, sincos, sincos3,
