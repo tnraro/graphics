@@ -1,7 +1,6 @@
 import TextureSetting from "./texture-setting";
 import styles from "../style/texture.module.css";
-import { ChangeEvent, RefObject } from "react";
-import { ITexture, TUpload, TOnLoad} from "../rp/types";
+import { ITexture, TUpload, TOnLoad} from "../renderer/types";
 
 let textureId = 0;
 const newTexture = (file: File): ITexture => {

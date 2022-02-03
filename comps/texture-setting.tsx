@@ -1,6 +1,6 @@
 import { useState, createRef } from "react";
 import styles from "../style/texture.module.css";
-import { ITexture, TUpload, TImgRef } from "../rp/types";
+import { ITexture, TUpload, TImgRef } from "../renderer/types";
 
 interface TextureSetting extends ITexture {
   upload: TUpload

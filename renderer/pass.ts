@@ -1,6 +1,6 @@
-import type { float3, float } from "../mathematics/types";
-import { ICamera } from "../3d/camera";
-import { IModel } from "../3d/model";
+import type { float3, float } from "./mathematics/types";
+import { ICamera } from "./models/camera";
+import { IModel } from "./models/model";
 import type { ITexture } from "./types";
 import { rxyz, wxyz } from "./buffer";
 export interface IProp {

@@ -1,12 +1,11 @@
-import {useState, useReducer, createRef, useEffect} from "react";
+import {useState, useReducer} from "react";
 
-import Canvas from "./comps/canvas";
-import TextureManager from "./comps/texture-manager"
-import styles from "./style/app.module.css"
-import "./style/global.css";
-import * as ply from "./loader/ply";
-import * as m from "./3d/model";
-import * as math from "./mathematics/math";
+import Canvas from "../comps/canvas";
+import TextureManager from "../comps/texture-manager"
+import styles from "../style/app.module.css"
+import "../style/global.css";
+import * as ply from "../loader/ply";
+import * as m from "../renderer/models/model";
 
 const App = () => {
   const [model, setModel] = useState(m.newModel());

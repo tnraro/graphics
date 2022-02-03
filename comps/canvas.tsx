@@ -5,14 +5,14 @@ import {
 } from "react";
 import Inspector from "./canvas-inspector";
 import styles from "../style/canvas.module.css";
-import {draw} from "../rp/draw";
-import { newCamera } from "../3d/camera";
-import * as math from "../mathematics/math";
-import * as t from "../3d/transform";
-import { View } from "../3d/view";
-import { IModel } from "../3d/model";
-import { ITexture } from "../rp/types";
-import { toNDC2 } from "../3d/canvas";
+import {draw} from "../renderer/draw";
+import { newCamera } from "../renderer/models/camera";
+import * as math from "../renderer/mathematics/math";
+import * as t from "../renderer/models/transform";
+import { View } from "../renderer/models/view";
+import { IModel } from "../renderer/models/model";
+import { ITexture } from "../renderer/types";
+import { toNDC2 } from "../renderer/models/canvas";
 
 const useInspectorToggle = () => {
   const initialState = process.env.NODE_ENV === "development";

@@ -1,9 +1,9 @@
 import { IProp, gBuffering, State } from "./pass";
-import { IModel } from "../3d/model";
-import { getPerspectiveProjectionMatrix } from "../3d/camera";
-import * as math from "../mathematics/math";
-import { getViewMatrix } from "../3d/view";
-import type { float3, matrix4x4, float4, float } from "../mathematics/types";
+import { IModel } from "./models/model";
+import { getPerspectiveProjectionMatrix } from "./models/camera";
+import * as math from "./mathematics/math";
+import { getViewMatrix } from "./models/view";
+import type { float3, matrix4x4, float4, float } from "./mathematics/types";
 import { unsafe_r24 } from "./buffer";
 
 const getMVP = (prop: IProp, model: IModel): matrix4x4 => {
