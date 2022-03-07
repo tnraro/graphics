@@ -50,7 +50,9 @@ const App = () => {
     fetch("taraq.ply")
       .then((res) => res.text())
       .then((taraq) => {
-        console.log(taraq);
+        const raw = ply.parser(taraq);
+        const model = m.newModelByFly(raw);
+        setModel(model);
       })
   }, []);
   return <div className={styles.container}>
