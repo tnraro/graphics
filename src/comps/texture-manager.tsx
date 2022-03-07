@@ -3,7 +3,7 @@ import styles from "../style/texture.module.css";
 import { ITexture, TUpload, TOnLoad} from "../renderer/types";
 
 let textureId = 0;
-const newTexture = (file: File): ITexture => {
+export const newTexture = (file: File): ITexture => {
   const name = file.name.replace(/\..*?$/, "");
   return {
     id: name + (textureId++),
@@ -13,7 +13,7 @@ const newTexture = (file: File): ITexture => {
     buf: null,
   }
 };
-const createTextureBuffer = (img: HTMLImageElement) => {
+export const createTextureBuffer = (img: HTMLImageElement) => {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d")!;
   const width = img.naturalWidth;

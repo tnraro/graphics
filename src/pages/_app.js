@@ -1,7 +1,7 @@
 import { useState, useReducer, useEffect } from "react";
 
 import Canvas from "../comps/canvas";
-import TextureManager from "../comps/texture-manager"
+import TextureManager, { newTexture } from "../comps/texture-manager"
 import styles from "../style/app.module.css"
 import "../style/global.css";
 import * as ply from "../loader/ply";
@@ -53,7 +53,17 @@ const App = () => {
         const raw = ply.parser(taraq);
         const model = m.newModelByFly(raw);
         setModel(model);
-      })
+      });
+    fetch("texture.png")
+      .then((res) => res.arrayBuffer())
+      .then((buf) => {
+        const file = new File([buf], "texture.png", { type: "image/png" });
+        const textures = [newTexture(file)];
+        dispatchTextures({
+          type: "APPEND_TEXTURES",
+          textures
+        });
+      });
   }, []);
   return <div className={styles.container}>
     <h1>쿠앙쿠앙</h1>
