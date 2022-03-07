@@ -1,4 +1,4 @@
-import {useState, useReducer} from "react";
+import {useState, useReducer, useEffect} from "react";
 
 import Canvas from "../comps/canvas";
 import TextureManager from "../comps/texture-manager"
@@ -73,6 +73,10 @@ const App = () => {
     }
     setModel(model);
   }
+  useEffect(() => {
+    // load default 3D model and texture
+    
+  }, []);
   return <div className={styles.container}>
     <h1>쿠앙쿠앙</h1>
     <input type="file" accept=".ply" onChange={loadObj}/>
