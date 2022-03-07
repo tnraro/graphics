@@ -65,12 +65,18 @@ const App = () => {
         });
       });
   }, []);
-  return <div className={styles.container}>
-    <h1>쿠앙쿠앙</h1>
-    <input type="file" accept=".ply" onChange={loadObj} />
-    <Canvas width={298} height={530} model={model} textures={textures.filter(({ uploaded }) => uploaded)} />
-    <TextureManager textures={textures} dispatch={dispatchTextures} />
-  </div>;
+  return <main className={styles.container}>
+    <section>
+      <h2>3D 모델 선택 (.ply)</h2>
+      <input type="file" accept=".ply" onChange={loadObj} />
+      <Canvas width={298} height={530} model={model} textures={textures.filter(({ uploaded }) => uploaded)} />
+    </section>
+    <section>
+      <h2>텍스처 선택</h2>
+      <p>💡 업로드한 텍스처만 사용합니다</p>
+      <TextureManager textures={textures} dispatch={dispatchTextures} />
+    </section>
+  </main>;
 }
 
 export default App;
