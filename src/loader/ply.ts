@@ -175,7 +175,11 @@ const parseData = (header: Header, data: string) => {
     faces
   };
 }
-export const parser = (text: string) => {
+export type Ply = {
+  vertices: { [index: string]: number | number[] }[],
+  faces: { [index: string]: number | number[] }[],
+}
+export const parser = (text: string): Ply => {
   const [h, d] = text.trim().split(/\s*end_header\s*/);
   const header = parseHeader(h);
   const data = parseData(header, d);
